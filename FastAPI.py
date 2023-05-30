@@ -127,3 +127,56 @@ if matching_files:
 else:
     print("No matching files found.")
 
+
+    
+####################
+
+import git
+import os
+
+def clone_and_modify_repo(repo_url, username, password, file_path, new_content, commit_message):
+    # Extract repository name from URL
+    repo_name = repo_url.split("/")[-1].split(".git")[0]
+
+    # Clone the repository
+    repo_dir = os.path.join(os.getcwd(), repo_name)
+    try:
+        git.Repo.clone_from(repo_url, repo_dir, auth=(username, password))
+    except git.GitCommandError:
+        print(f"Failed to clone the repository: {repo_url}")
+        return
+
+    # Change directory to the cloned repository
+    os.chdir(repo_dir)
+
+    try:
+        # Open the file and modify its content
+        with open(file_path, "w") as f:
+            f.write(new_content)
+
+        # Initialize a Git repo
+        repo = git.Repo(repo_dir)
+
+        # Add the modified file to the index
+        repo.index.add([file_path])
+
+        # Commit the changes
+        repo.index.commit(commit_message)
+
+        # Push the changes to the remote repository
+        origin = repo.remote(name="origin")
+        origin.push()
+
+        print("Changes committed and pushed successfully.")
+    except Exception as e:
+        print(f"An error occurred while modifying the repository: {str(e)}")
+
+# Example usage
+repo_url = "https://bitbucket.org/username/repository.git"
+username = "your_username"
+password = "your_password"
+file_path = "path/to/file.txt"
+new_content = "New content"
+commit_message = "Modified file"
+
+clone_and_modify_repo(repo_url, username, password, file_path, new_content, commit_message)
