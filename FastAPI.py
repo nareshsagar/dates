@@ -78,3 +78,52 @@ username = "your_username"
 password = "your_password"
 
 clone_and_modify_repo(repo_url, username, password)
+
+
+
+##############
+
+import subprocess
+import os
+
+def clone_and_search_repo(repo_url, username, password, search_string):
+    # Extract repository name from URL
+    repo_name = repo_url.split("/")[-1].split(".git")[0]
+
+    # Clone the repository
+    clone_command = f"git clone {repo_url}"
+    try:
+        subprocess.run(clone_command.split(), check=True)
+    except subprocess.CalledProcessError:
+        print(f"Failed to clone the repository: {repo_url}")
+        return []
+
+    # Change directory to the cloned repository
+    repo_dir = os.path.join(os.getcwd(), repo_name)
+    os.chdir(repo_dir)
+
+    # Search for the string in files and directories
+    matching_files = []
+    for root, dirs, files in os.walk("."):
+        for file in files:
+            file_path = os.path.join(root, file)
+            with open(file_path, "r") as f:
+                content = f.read()
+                if search_string in content:
+                    matching_files.append(file_path)
+
+    return matching_files
+
+# Example usage
+repo_url = "https://bitbucket.org/username/repository.git"
+username = "your_username"
+password = "your_password"
+search_string = "your_search_string"
+
+matching_files = clone_and_search_repo(repo_url, username, password, search_string)
+if matching_files:
+    result = "\n".join(matching_files)
+    print(f"Matching files:\n{result}")
+else:
+    print("No matching files found.")
+
