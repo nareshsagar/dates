@@ -34,3 +34,47 @@ def search_bitbucket_server_repository(base_url, project_key, repository_slug, s
 
 # Example usage
 search_bitbucket_server_repository('https://bitbucket.example.com', 'my-project', 'my-repo', 'search-string')
+
+
+import subprocess
+import os
+
+def clone_and_modify_repo(repo_url, username, password):
+    # Extract repository name from URL
+    repo_name = repo_url.split("/")[-1].split(".git")[0]
+
+    # Clone the repository
+    clone_command = f"git clone {repo_url}"
+    try:
+        subprocess.run(clone_command.split(), check=True)
+    except subprocess.CalledProcessError:
+        print(f"Failed to clone the repository: {repo_url}")
+        return
+
+    # Change directory to the cloned repository
+    repo_dir = os.path.join(os.getcwd(), repo_name)
+    os.chdir(repo_dir)
+
+    # Make changes to a file
+    file_path = "path/to/file.txt"
+    with open(file_path, "a") as file:
+        file.write("Added some changes")
+
+    # Commit the changes
+    subprocess.run(["git", "add", file_path])
+    subprocess.run(["git", "commit", "-m", "Made some changes"])
+
+    # Push the changes to the repository
+    subprocess.run(["git", "push", "origin", "master"])
+
+    # Create a pull request
+    pull_request_title = "My Pull Request"
+    pull_request_body = "Please review my changes"
+    subprocess.run(["git", "request-pull", "-m", pull_request_title, "origin/master"])
+
+# Example usage
+repo_url = "https://bitbucket.org/username/repository.git"
+username = "your_username"
+password = "your_password"
+
+clone_and_modify_repo(repo_url, username, password)
