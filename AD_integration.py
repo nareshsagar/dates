@@ -46,4 +46,41 @@ def login(username: str, password: str):
         return {'message': 'Login successful'}
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Not authorized')
-          
+
+
+
+
+
+
+
+
+
+from pyad import *
+
+def get_group_members(group_name):
+    pyad.set_defaults(ldap_server="ldap://your_domain_controller")
+    
+    try:
+        group = pyad.adgroup.ADGroup.from_cn(group_name)
+        members = group.get_members(recursive=False)
+        
+        member_list = []
+        for member in members:
+            member_list.append(member.get_attribute("sAMAccountName"))
+            
+        return member_list
+    
+    except pyad.pyadexceptions.ADObjectNotFoundError:
+        print("Group not found.")
+        return []
+    
+# Replace "your_domain_controller" with the LDAP server address of your domain controller.
+# Make sure to install the required dependencies by running "pip install pyad"
+
+group_name = "Your Group Name"
+members = get_group_members(group_name)
+
+print(f"Members of '{group_name}':")
+for member in members:
+    print(member)
+
